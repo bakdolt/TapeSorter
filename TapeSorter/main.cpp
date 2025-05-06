@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     TapeSorter sorter(memory_limit);
     sorter.sort(input, output);
 
-    std::cout << "Tape sorted\n";
+    std::cout << "\n=== Tape sorted ===\n";
 
     return 0;
 }
