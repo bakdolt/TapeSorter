@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{20511d8d-f617-47af-801f-087f0688b02b}</ProjectGuid>
-    <RootNamespace>TapeSorter</RootNamespace>
+    <ProjectGuid>{e439cc86-7b85-4f71-9557-4031a8247f19}</ProjectGuid>
+    <RootNamespace>TapeInteractor</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -104,7 +104,6 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,19 +127,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DelayConfig.cpp" />
-    <ClCompile Include="FileTape.cpp" />
-    <ClCompile Include="FileTape.h" />
+    <ClCompile Include="FileHandler.cpp" />
+    <ClCompile Include="InputGenerator.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="TapeSorter.cpp" />
+    <ClCompile Include="MenuManager.cpp" />
+    <ClCompile Include="OutputReader.cpp" />
+    <ClCompile Include="TapeInteractor.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DelayConfig.h" />
-    <ClInclude Include="Tape.h" />
-    <ClInclude Include="TapeSorter.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="config.txt" />
+    <ClInclude Include="FileHandler.h" />
+    <ClInclude Include="InputGenerator.h" />
+    <ClInclude Include="MenuManager.h" />
+    <ClInclude Include="OutputReader.h" />
+    <ClInclude Include="TapeInteractor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

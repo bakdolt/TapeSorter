@@ -1,20 +1,92 @@
-п»ї// TapeSorter.cpp : Р­С‚РѕС‚ С„Р°Р№Р» СЃРѕРґРµСЂР¶РёС‚ С„СѓРЅРєС†РёСЋ "main". Р—РґРµСЃСЊ РЅР°С‡РёРЅР°РµС‚СЃСЏ Рё Р·Р°РєР°РЅС‡РёРІР°РµС‚СЃСЏ РІС‹РїРѕР»РЅРµРЅРёРµ РїСЂРѕРіСЂР°РјРјС‹.
-//
+#include "TapeSorter.h"
+#include "FileTape.h"
+#include <algorithm>
+#include <queue>
+#include <fstream>
+#include <filesystem>
 
-#include <iostream>
+struct HeapElement {
+    int value;
+    size_t tape_idx;
+    bool operator>(const HeapElement& other) const { return value > other.value; }
+};
 
-int main()
-{
-    std::cout << "Hello World!\n";
+TapeSorter::TapeSorter(size_t memory_limit) : memory_limit(memory_limit) {}
+
+void TapeSorter::sort(Tape& input, Tape& output) {
+    auto chunk_files = splitIntoChunks(input);
+    mergeChunks(chunk_files, output);
+    cleanTempFiles(chunk_files);
 }
 
-// Р—Р°РїСѓСЃРє РїСЂРѕРіСЂР°РјРјС‹: CTRL+F5 РёР»Рё РјРµРЅСЋ "РћС‚Р»Р°РґРєР°" > "Р—Р°РїСѓСЃРє Р±РµР· РѕС‚Р»Р°РґРєРё"
-// РћС‚Р»Р°РґРєР° РїСЂРѕРіСЂР°РјРјС‹: F5 РёР»Рё РјРµРЅСЋ "РћС‚Р»Р°РґРєР°" > "Р—Р°РїСѓСЃС‚РёС‚СЊ РѕС‚Р»Р°РґРєСѓ"
+std::vector<std::string> TapeSorter::splitIntoChunks(Tape& input) {
+    // Размер одной временной ленты определяется лимитом оперативной памяти
+    std::vector<std::string> chunk_files;
+    size_t chunk_size = memory_limit / sizeof(int);
+    std::vector<int> buffer;
 
-// РЎРѕРІРµС‚С‹ РїРѕ РЅР°С‡Р°Р»Сѓ СЂР°Р±РѕС‚С‹ 
-//   1. Р’ РѕРєРЅРµ РѕР±РѕР·СЂРµРІР°С‚РµР»СЏ СЂРµС€РµРЅРёР№ РјРѕР¶РЅРѕ РґРѕР±Р°РІР»СЏС‚СЊ С„Р°Р№Р»С‹ Рё СѓРїСЂР°РІР»СЏС‚СЊ РёРјРё.
-//   2. Р’ РѕРєРЅРµ Team Explorer РјРѕР¶РЅРѕ РїРѕРґРєР»СЋС‡РёС‚СЊСЃСЏ Рє СЃРёСЃС‚РµРјРµ СѓРїСЂР°РІР»РµРЅРёСЏ РІРµСЂСЃРёСЏРјРё.
-//   3. Р’ РѕРєРЅРµ "Р’С‹С…РѕРґРЅС‹Рµ РґР°РЅРЅС‹Рµ" РјРѕР¶РЅРѕ РїСЂРѕСЃРјР°С‚СЂРёРІР°С‚СЊ РІС‹С…РѕРґРЅС‹Рµ РґР°РЅРЅС‹Рµ СЃР±РѕСЂРєРё Рё РґСЂСѓРіРёРµ СЃРѕРѕР±С‰РµРЅРёСЏ.
-//   4. Р’ РѕРєРЅРµ "РЎРїРёСЃРѕРє РѕС€РёР±РѕРє" РјРѕР¶РЅРѕ РїСЂРѕСЃРјР°С‚СЂРёРІР°С‚СЊ РѕС€РёР±РєРё.
-//   5. РџРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ РІС‹Р±РµСЂРёС‚Рµ РїСѓРЅРєС‚С‹ РјРµРЅСЋ "РџСЂРѕРµРєС‚" > "Р”РѕР±Р°РІРёС‚СЊ РЅРѕРІС‹Р№ СЌР»РµРјРµРЅС‚", С‡С‚РѕР±С‹ СЃРѕР·РґР°С‚СЊ С„Р°Р№Р»С‹ РєРѕРґР°, РёР»Рё "РџСЂРѕРµРєС‚" > "Р”РѕР±Р°РІРёС‚СЊ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ СЌР»РµРјРµРЅС‚", С‡С‚РѕР±С‹ РґРѕР±Р°РІРёС‚СЊ РІ РїСЂРѕРµРєС‚ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёРµ С„Р°Р№Р»С‹ РєРѕРґР°.
-//   6. Р§С‚РѕР±С‹ СЃРЅРѕРІР° РѕС‚РєСЂС‹С‚СЊ СЌС‚РѕС‚ РїСЂРѕРµРєС‚ РїРѕР·Р¶Рµ, РІС‹Р±РµСЂРёС‚Рµ РїСѓРЅРєС‚С‹ РјРµРЅСЋ "Р¤Р°Р№Р»" > "РћС‚РєСЂС‹С‚СЊ" > "РџСЂРѕРµРєС‚" Рё РІС‹Р±РµСЂРёС‚Рµ SLN-С„Р°Р№Р».
+    input.rewindToStart();
+    while (!input.isAtEnd()) {
+        buffer.clear();
+        for (size_t i = 0; i < chunk_size && !input.isAtEnd(); ++i) {
+            buffer.push_back(input.read());
+            input.moveForward();
+        }
+        std::sort(buffer.begin(), buffer.end());
+
+        // Создаем временные ленты tmp/chunk_{номер}
+        std::string chunk_name = "tmp/chunk_" + std::to_string(chunk_files.size());
+        DelayConfig config; // нулевые задержки для временных лент
+        FileTape chunk_tape(chunk_name, config);
+        for (int num : buffer) {
+            chunk_tape.write(num);
+            chunk_tape.moveForward();
+        }
+        chunk_files.push_back(chunk_name);
+    }
+    return chunk_files;
+}
+
+void TapeSorter::mergeChunks(const std::vector<std::string>& chunk_files, Tape& output) {
+    std::vector<std::unique_ptr<Tape>> tapes;
+    std::priority_queue<HeapElement, std::vector<HeapElement>, std::greater<>> heap;
+
+    // Открываем все временные ленты
+    DelayConfig config; // нулевые задержки для временных лент
+    for (const auto& file : chunk_files) {
+        tapes.emplace_back(std::make_unique<FileTape>(file, config));
+        tapes.back()->rewindToStart();
+        if (!tapes.back()->isAtEnd()) {
+            heap.push({ tapes.back()->read(), tapes.size() - 1 });
+        }
+    }
+
+    // Слияние
+    output.rewindToStart();
+    HeapElement min;
+    while (!heap.empty()) {
+        min = heap.top();
+        heap.pop();
+        output.write(min.value);
+        output.moveForward();
+
+        auto& tape = *tapes[min.tape_idx];
+        tape.moveForward();
+        if (!tape.isAtEnd()) {
+            heap.push({ tape.read(), min.tape_idx });
+        }
+    }
+
+    /*
+    При слиянии НЕ загружаются все временные ленты сразу в оперативную память
+    - от каждой загружается по одному первому элементу, по которому их сортирует куча
+    Сразу же как элемент достается из кучи - запиывается в выходную ленту, потом перезаписывается следующим
+    */
+}
+
+// Удаление всех времнных лент, очистка памяти
+void TapeSorter::cleanTempFiles(const std::vector<std::string>& files) {
+    for (const auto& file : files) {
+        std::filesystem::remove(file);
+    }
+}

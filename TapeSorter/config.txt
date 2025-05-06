@@ -1,0 +1,1 @@
+0 0 0 0  # read_delay, write_delay, move_delay, rewind_delay_per_position
