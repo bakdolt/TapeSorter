@@ -4,4 +4,4 @@ int main() {
     TapeInteractor interactor;
     interactor.run();
     return 0;
-} 
+}

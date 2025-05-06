@@ -8,11 +8,19 @@
 #include <codecvt>
 #include "TapeInteractor.h"
 #include <limits>
+#include <filesystem>
 
-// Значение по умолчанию для имён файлов
 TapeInteractor::TapeInteractor() {
-    inputFilename = "../SharedData/input.bin";
-    outputFilename = "../SharedData/output.bin";
+    std::filesystem::path exePath = std::filesystem::current_path();
+    std::filesystem::path sharedDataPath = exePath / "SharedData";
+    
+    // Создаем директорию SharedData, если она не существует
+    if (!std::filesystem::exists(sharedDataPath)) {
+        std::filesystem::create_directory(sharedDataPath);
+    }
+    
+    inputFilename = (sharedDataPath / "input.bin").string();
+    outputFilename = (sharedDataPath / "output.bin").string();
 }
 
 void TapeInteractor::run() {
@@ -63,8 +71,9 @@ void TapeInteractor::handleInputGeneration() {
                 break;
             }
             case 3: {
-                // Значение по умолчанию для имени файла
-                std::string txtFilename = "../SharedData/input.txt";
+                // Используем путь относительно исполняемого файла
+                std::filesystem::path exePath = std::filesystem::current_path();
+                std::string txtFilename = (exePath / "SharedData" / "input.txt").string();
                 
                 inputGenerator.generateFromTxt(txtFilename, inputFilename);
                 break;
@@ -87,10 +96,12 @@ void TapeInteractor::handleOutputReading() {
                 outputReader.readOutput(outputFilename);
                 break;
             case 2: {
-                // Значение по умолчанию для имени файла
-                std::string txt_filename = "../SharedData/output.txt";
+
+                // Используем путь относительно исполняемого файла
+                std::filesystem::path exePath = std::filesystem::current_path();
+                std::string txtFilename = (exePath / "SharedData" / "output.txt").string();
                 
-                outputReader.readOutputToTxt(outputFilename, txt_filename);
+                outputReader.readOutputToTxt(outputFilename, txtFilename);
                 break;
             }
             case 3:
